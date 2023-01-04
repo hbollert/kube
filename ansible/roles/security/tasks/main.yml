@@ -1,0 +1,288 @@
+---
+### SSH config
+- name: be sure sshd are installed
+  yum:
+    name: openssh
+    state: latest
+  tags: sshd
+
+- name: be sure sshd is configured
+  template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config
+    mode: 0600
+    owner: "0"
+    group: "0"
+    backup: yes
+    validate: '/usr/sbin/sshd -T -f %s'
+  notify: restart sshd
+  when:
+    - '"cluster" not in group_names'
+    - '"matching" not in group_names' 
+  tags: sshd
+
+- name: add known user keys
+  blockinfile:
+    path: /root/.ssh/authorized_keys
+    block: |
+      ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBADYktHqZhkindoViY4eB3MBYgmfGh1fqoCwvQPu5TDnusrG2kNeJdsveEbC1qOcAHkkjRLRKlUMwFDA1DkuZpRr8gE/UmMlldV9u68L+HAlF4rCM9C2i59xsuaFryoSuXqf6wex//7+3eK1tdEEGspQWVXTqwmFnjGOppLkswdeszEGAA== hbol@giata-tec200
+      ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAEBnhwV+zR0nQxGnzcuQiLfp0NQpom8USbx6Bk388zmnG0T4/r1FAyTBiLvkGunos7ZQPkHR4u/mIYMba473MO1SgGLbUKotnD95SgrXFQIrmHCs7WneZrmPlkU3RgebLyaVpWA4NtboTguO0R/h+q1pb4Jm0SLSAsVj95LebLV1IUYow== hbol@giata-tec201
+      ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAG7hCViL+H4iGW9yd1ik0YR1/q1IVWN3wkFpqh8XfdK0EJeXgGmG1Z4us36MX81EdInLFbvE5f90416oyW8+GomKQDE8+o2XroCsBeWrNr7fKdVwKLY9Xj+7cL52a8Z17QjHhl9PR7PPe09Bv0UtVS99oMtyChKYVoc2Hw3fV2WSrnjrw== hbol@giata-tec207
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCtYzzpGla4UZvoZclO08SW4dM+HKVCkQzn4rDy+EipP9UtXlIXgNwav2nH9Lw+j6DtsmO2kZJdEbnKhVsKPFWBI7o4o99mQdhfoNe+PCWp7xaJrVuYCYs9MMTALn6/i1RYpdHASbj0QH+m53c9a7786fHHvjDfky5zBVrjHjH9+pByjM+1XVsSGlJCthukLmK336M1RdqKMo7eiIeyHMP/Sk658gfy+PaX3iPPDMOWg45XMMqTLT2VNqOHuXCXwBGgYVt8gjvqe9MXjEKEB2chCwZs4uoEnLuFo3ADhEXzwC8iMm9ba8b7YKJLjGdAmpw0QSpuHBlRKp1mwwIpJHLdqpMjzxhGmWBazksKr3zYyYKlTTy1DDlrjAOGYhvuM08LODfcTYWym099VuuXF6Wg80BoeZy7pVPePAtkJ3HLLVq+UQScws4zE4G5RjzNB2BhEkntKppsTZe2H0NO+e/OdUbeFdogvv4Q0fnDjAi0WrU76L8r48Y08m56w+Bdiyc= awei@giata-tec68
+      ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAD0d+mUta5qaHy9chsyJGS8qad+WH+pZfUotChScYVALDd2SvyuIJqcj6jHxE9nR6tUGY+DofTb1EfX5EMGjpCUlwBAE+3vVWkxTA9hXqQw30espAhpxyEXAovX+iFaLXAOP8Oi7KHshvHh9AZYGycplFXsXf4fRBYQK9+A66wQyZ8jLA== andy@TecMac.local
+    marker: "# {mark} ANSIBLE MANAGED USER BLOCK"
+  tags: sshd
+
+- name: add known system keys intern
+  blockinfile:
+    path: /root/.ssh/authorized_keys
+    block: |
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDWTg0pCiCmMju0mSH4/VD2VQu1dSfslYFCxHUJCamHQc+bZXRvFr6VfK5cYxbdQV0AVz6+aVxuZD+28rAEXl1f6gOXT5Exc6emOFvXRKIQWKk3cFyr+kv5k8SbitF2Pv/gbDTe08fYk9VTSBKgn5yaYCbTvLLj43twIPugNsP1cGzT3S64MNTIBppoRD+61c1aMA2nQauGXEfLBerPNYvN/Ux7V3isZ6sCMpSHi3ErlOHdtnO28bYgLZON12sFg2X69ViTt5lfVn6GGxqTjahoBAU+dvO9FR8ZNDmf3R2BstkCOivYaHSE0tN++zuURHQzh/h5c1O24P1ZC8t+c7qB root@openvas
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCtXTr5LmPw6OhneEZMI7z/mKmLHQpbnBVIIjHtCPD5t3yDrxmy9x7Btx4sNMshfnY4BanTWsNfqw4JWdAjcqGq97Gf4hm2ELtJVjfFKhDZneNMJWtz3oZUrxpAmkeHSNbBxv2QrCQKGbWb+HTGmAcSnnhIIXy1gNuZeCpEr3p1WObQPXhxqfL7h4bNyXIaGT0yTkoJIqGxvaszq5uyxoopuRgJ8Mo1tuw0vyErPlpxb9zy5ftQfovCN/22N0YdcchyIRocnbKfpioVpKZrh/riT0KsRWpQwxvRbGvBzht0qSOOhe8ISAAG1K/NYPorr9t7u8z39isc33IucNmR1Dix root@bacula-01.giata.intern
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUIuwlylisvviEbuCSsbaQX3zYWfniLU9GXS9l5ScA6zbnd0ajZwsAmHNE7Nu2duvIkNNaAI7RAtqJEXn/9DuTngMmCU/exLruStNNUMBVyRzUXQet2xwIBjCjmZjSusHWS0Xsd1kDhlT1iyi50ZspOFg8GpinbIuOe5frlb82ONBrWZImqPrls6QUus4EKyOW4m51HKI/h/vrhlnrfc9NRBzghoETHg46sziyeSilrHVN3ElNWVVQlekAB77T9zYzYoBi14Q2zZurTRcL05PX3FRsFQS+fuZ8LOqVG/WyIJwtwrTinwI0zUbgjzd/FI8GTZ6ijMMoxYriLs+IMAsr bweb@bacula-01.giata.intern
+    marker: "# {mark} ANSIBLE MANAGED SYSTEM BLOCK"
+  when:
+    - '"extern" not in group_names'
+    - '"cluster" not in group_names'
+  tags: sshd
+
+- name: add known cluster keys intern
+  blockinfile:
+    path: /root/.ssh/authorized_keys
+    block: |
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2D3dMKjTAbC97UnsHwZJdEs06K6l3Em/Qs79bB6zYc1T4n8PU1RjGxrL7GWlDdiRA2rkatJn0RvTWCN0yUMroMmnO1vHKfJPu1ui3K8jlgxzI2M+U7ewXTCZ3IjTpX/2HxbwGnIyWG6aYbin2IDe449F8vGpeAqSNv6ikXZTBzvvvSG+28kuNK/hEgPlkYp2xw7jBEOSgLsPRZA65iex/I9ZtxvOdfefk+tMzeoRDKWRdzNEU3ctv3KwZHnnDyH0vRNI4A8YGX2F978LliClJkCctDlIdJak+LxK/FtQGtP0x0es5fRSz5fUowLznLPRuMXBD18IK6UaLkzixyQTJ root@cluster-01.giata.intern
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDSyvcLOqn8fDx0WzinWCzGmPUnRJaa5BcJFSQjgoKRSySFXJhuXNL4M3cRNrEqkbGpz4O44gaBBdf3gh/DjdjlHey3tsEgFwNWShgE3n8uTFzWv8h00YdRxm4kapWNl2iVHLmROv2b9laxT5SwkrKzIywI+/Ds1fIB57jXJqO7XYxlMkPqhWn0eEAMiVpm3d2EqarDsmY00NaB4/EoP0RGK2zjBE+JHqb83G1aJiATS7FWgR1kX5ArAH75sTHAzZZgV4Crsh0KK7zSu5vFMo6STqmirCX02uyo4qfVT1GiIYoqdzvXjOUBxCn9h8EV9XKG4FtdEUOrdwX2LACiSAD5 root@cluster-02.giata.intern
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCfVMIlGfAP9vl5u51aem0pVVBoVlkoXXbyRjIvxZgVuRsYznO+XWYBpb7iximt9vMzM/N3/O2shgRD8FAOivJvdrAevz8hO6/UJhDJ3w9FjO3bX44RV3zZKmzJHITI9k6ZIiFyJGYJ0GiDeaqVIRuFM0eC4f6MX2p+jS+p9Y9T5SSLFPeaXHQcxqECaBRDUeHQERLtJ97hSkjB2Kov5AJWcPxLleQS7foRpV8j2V/HNHK1k+9Ea1IyBH8moEyTr8vpBd+397j1GQdwGSI/z3TEt4imdmrqAhWiWjNIzL6sZ6qKSz0QmadqPAHYdmhvA7XQO+knxNU3yV8pEIfYRXPL root@cluster-03.giata.intern
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+XtmDg+1Capi37lsQrHbdj1o9k37CnSbt1KouJzUDWUb9fX7355kGPAA0u9KgWTOwctF1fG363kHLX0GfVsqQ4n9eQ2yzkgOgAMl5JwGRMr0r/zrkcrBTzNoxp9qv/uIt1dYy5aOKn31ELNzmal+llyPiO5PjGQZoafFvmOiLDfpFpvHKdxe1VFoWQCWTFoAhZSr4oK3nuBR4zrcrFA6WBvDqpmhygmO+JBC02bDWGCqQHwoujKSRq97rYMAHQUPQiPjvPD/QKntaoKWOftkBpNGwaVD1YWbyVcjlvKFILZLPe81CRpuU/3ISAcVRJZCZTbcKdP+SkfgvqKhxkL8/ root@cluster-04.giata.intern
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvqUuj4wwKDOjM9AOgztYMxG2+414R1AgXTWIfCWIeN+jZAyrcYIT2tApkKPuTbtTBTAC9ySB0swBiszVy+vOTEOIDmct/qpUCEwBkGh9SSXWggwuN6pOWlfOr/yH5DjDo6+2R9Y9CSI45pSRT6lbkgI/TywFfq2G6rXyQF2YYr0o/KIF/pG4QASIwEFxjqwNtcuir1SAQdUjeag0oP8DGM1aQeGfxHIk4AfIq8IjujcFMv6vl18xdMszHMC14eOzEtWMDRAZ+j8oSZPBGu4P5+rWXdtiuuDvd4uPr5Y+4b/Xn4qmYNKzgxeqALDAJDEjM7mCaOb0RwzlCpFY+QGfN root@cluster-05.giata.intern
+    marker: "# {mark} ANSIBLE MANAGED CLUSTER BLOCK"
+  when:
+    - '"cluster" in group_names'
+  tags: sshd
+
+- name: add known system keys extern
+  blockinfile:
+    path: /root/.ssh/authorized_keys
+    block: |
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDWTg0pCiCmMju0mSH4/VD2VQu1dSfslYFCxHUJCamHQc+bZXRvFr6VfK5cYxbdQV0AVz6+aVxuZD+28rAEXl1f6gOXT5Exc6emOFvXRKIQWKk3cFyr+kv5k8SbitF2Pv/gbDTe08fYk9VTSBKgn5yaYCbTvLLj43twIPugNsP1cGzT3S64MNTIBppoRD+61c1aMA2nQauGXEfLBerPNYvN/Ux7V3isZ6sCMpSHi3ErlOHdtnO28bYgLZON12sFg2X69ViTt5lfVn6GGxqTjahoBAU+dvO9FR8ZNDmf3R2BstkCOivYaHSE0tN++zuURHQzh/h5c1O24P1ZC8t+c7qB root@openvas
+    marker: "# {mark} ANSIBLE MANAGED SYSTEM BLOCK"
+  when:
+    - '"extern" in group_names'
+  tags: sshd
+
+- name: be sure sshd is running and enabled
+  service:
+    name: sshd
+    state: started
+    enabled: yes
+  tags: sshd
+
+### firewall on redhat system
+- name: be sure firewalld are installed
+  yum:
+    name: firewalld
+    state: latest
+  when:
+    - '"matching" not in group_names'  
+  tags: fwd
+
+- name: ensure that firewalld is running and enabled
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+  when:
+    - '"matching" not in group_names'
+  tags: fwd
+
+- name: disable zone drifting
+  lineinfile:
+    path: /etc/firewalld/firewalld.conf
+    regexp: '^AllowZoneDrifting='
+    line: 'AllowZoneDrifting=no'
+  notify: restart firewalld
+  when:
+    - '"matching" not in group_names'
+  tags: fwd
+
+- name: firewalld disabled unused services on public on all hosts
+  firewalld:
+    zone: public
+    service: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: disabled
+  with_items:
+    - dhcpv6-client
+    - cockpit
+  when:
+    - '"matching" not in group_names'
+  tags: fwd
+
+# allowed rules on extern servern
+- name: ssh services on extern server
+  firewalld:
+    zone: public
+    rich_rule: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items:
+    - 'rule family="ipv4" port port="2222" protocol="tcp" log prefix="SSH Access" level="notice" accept'
+    - 'rule family="ipv4" source address="213.61.255.82/28" service name="ssh" log prefix="SSH Access" level="notice" accept'
+    - 'rule family="ipv4" source address="213.61.210.240/29" service name="ssh" log prefix="SSH Access" level="notice" accept'
+  when:
+    - '"extern" in group_names'
+    - '"matching" not in group_names'    
+  tags: fwd_ext
+
+- name: allowed rules on extern server
+  firewalld:
+    zone: public
+    rich_rule: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items: "{{ FW_RichRules }}"
+  when:
+    - '"extern" in group_names'
+    - '"matching" not in group_names'
+    - FW_RichRules is defined
+  tags: fwd_ext
+
+#allowed on intern servern
+- name: allowed ssh on intern server
+  firewalld:
+    zone: public
+    service: ssh
+    permanent: yes
+    immediate: yes
+    state: enabled
+  when:
+    - '"extern" not in group_names'
+    - '"matching" not in group_names'
+    - FW_Zone_INT is not defined
+  tags: fwd_int
+
+- name: allowed ssh on intern server with zones
+  firewalld:
+    zone: "{{ item.zone }}"
+    service: ssh
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items: 
+    - zone: "{{ FW_Zone_INT }}"
+  when:
+    - '"extern" not in group_names'
+    - '"matching" not in group_names'
+    - FW_Zone_INT is defined
+  tags: fwd_int
+
+- name: allowed rules on intern servern intern zone
+  firewalld:
+    zone: "{{ item.zone }}"
+    rich_rule: "{{ item.rule }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items: "{{ FW_Rules_INT }}"
+  when:
+    - '"extern" not in group_names'
+    - '"matching" not in group_names'
+    - FW_Zone_INT is defined
+    - FW_Rules_INT is defined
+  tags: fwd_int
+
+- name: allowed rules on intern server extern zone
+  firewalld:
+    zone: "{{ item.zone }}"
+    rich_rule: "{{ item.rule }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items: "{{ FW_Rules_EXT }}"
+  when:
+    - '"extern" not in group_names'
+    - '"matching" not in group_names'
+    - FW_Zone_EXT is defined
+    - FW_Rules_EXT is defined
+  tags: fwd_int
+
+# copy service files to intern server
+- name: copy service file
+  copy:
+    src: "{{ item }}"
+    dest: /etc/firewalld/services/{{ item }}
+    mode: 0644
+    owner: 0
+    group: 0
+  with_items:
+    - eaton.xml
+    - bweb.xml
+  register: cp_fwd_service
+  when:
+    - '"extern" not in group_names'
+    - '"cluster" not in group_names'
+    - '"matching" not in group_names'
+  tags: fwd
+
+- name: reload firewalld if xml copied
+  shell: "firewall-cmd --reload"
+  when:
+    - cp_fwd_service is changed
+  tags: fwd_tmp
+
+# remove old rules
+- name: remove rich rules-rules 
+  firewalld:
+    zone: public
+    rich_rule: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: disabled
+  with_items:
+  - rule family="ipv4" source address="212.91.241.46" service name="ssh" log prefix="SSH Access" level="notice" accept
+  - rule family="ipv4" source address="79.140.113.210" service name="ssh" log prefix="SSH Access" level="notice" accept
+  - rule family="ipv4" source address="178.63.14.149" service name="ssh" log prefix="SSH Access" level="notice" accept
+  - rule family="ipv4" source address="5.9.43.71" port port="10050" protocol="tcp" accept
+  - rule family="ipv4" source address="172.26.1.102" port port="10050" protocol="tcp" accept
+  - rule family="ipv4" source address="172.26.1.103" port port="10050" protocol="tcp" accept
+  - rule family="ipv4" source address="172.26.110.90" service name="cockpit" accept
+  when:
+    - '"matching" not in group_names'    
+  tags: fwd
+
+### fail2ban on redhat
+- name: be sure fail2ban are installed
+  yum:
+    name: fail2ban,whois
+    state: latest
+  when:
+    - '"cluster" not in group_names'
+    - '"matching" not in group_names'    
+  tags: f2b
+
+- name: ensure that f2b is running and enabled
+  service:
+    name: fail2ban
+    state: started
+    enabled: yes
+  when:
+    - '"cluster" not in group_names'
+    - '"matching" not in group_names'    
+  tags: f2b
+
+- name: be sure f2b is configured
+  template:
+    src: jail.conf.j2
+    dest: /etc/fail2ban/jail.conf
+    mode: 0644
+    owner: "0"
+    group: "0"
+    backup: yes
+  notify: restart fail2ban
+  when:
+    - '"cluster" not in group_names'
+    - '"matching" not in group_names'
+  tags: f2b

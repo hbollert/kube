@@ -1,0 +1,5 @@
+---
+- import_playbook: common.yml
+- import_playbook: security.yml
+- import_playbook: maintenance.yml
+- import_playbook: check.yml

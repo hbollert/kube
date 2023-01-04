@@ -1,0 +1,27 @@
+---
+### show kernel
+- name: get running kernel
+  shell: uname -r
+  register: kernel_running_output
+  tags: kernel_version
+
+- name: get installed kernel
+  shell: rpm -qa kernel
+  register: kernel_installed_redhat
+  tags: kernel_version
+  args:
+    warn: false
+
+- name: Print distribution
+  ansible.builtin.debug:
+    var: ansible_distribution
+  tags: facts
+
+- name: Print major version
+  ansible.builtin.debug:
+    var: ansible_distribution_major_version
+  tags: facts
+
+- debug: msg="running= {{ kernel_running_output.stdout}} - installed= {{ kernel_installed_redhat.stdout}}"
+  tags: kernel_version
+

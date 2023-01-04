@@ -1,0 +1,14 @@
+---
+- name: restart postfix
+  service:
+    name: postfix
+    state: restarted
+
+- name: rebuild aliases
+  command: /usr/bin/newaliases
+
+- name: restart smartd
+  service:
+    name: smartd
+    state: restarted
+

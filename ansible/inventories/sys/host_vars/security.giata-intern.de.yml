@@ -1,0 +1,10 @@
+---
+ansible_host: 65.21.77.35
+ansible_port: 2222
+ansible_python_interpreter: /usr/bin/python3.6
+FW_RichRules:
+  - rule family="ipv4" source address="213.61.210.242" port port="10050" protocol="tcp" accept
+  - rule family="ipv4" service name="https" accept
+  - rule family="ipv4" source address="213.61.210.242/29" service name="cockpit" accept
+  - rule family="ipv4" source address="213.61.255.82/28" service name="cockpit" accept
+SMTP_sender: technik@giata.com

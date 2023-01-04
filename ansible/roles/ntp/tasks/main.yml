@@ -1,0 +1,29 @@
+---
+# redhat chrony install and config
+
+- name: be sure ntp is not installed
+  yum:
+    name: ntp
+    state: absent
+  tags: chrony
+
+- name: be sure chrony is installed
+  yum:
+    name: chrony
+    state: installed
+  tags: chrony
+
+- name: be sure chrony is configured
+  template:
+    src: chrony.conf.j2
+    dest: /etc/chrony.conf
+  notify:
+    - restart chronyd
+  tags: chrony
+
+- name: be sure chronyd is running and enabled
+  service:
+    name: chronyd
+    state: started
+    enabled: yes
+  tags: chrony

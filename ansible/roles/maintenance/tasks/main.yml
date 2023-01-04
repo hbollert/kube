@@ -1,0 +1,63 @@
+---
+- name: upgrade all packages (redhat)
+  yum:
+    name: '*'
+    state: latest
+  when:
+    - '"cluster" not in group_names'
+    - '"matching" not in group_names'    
+  register: upgraded_RH
+  tags: upgrade
+
+- name: autoremove unused packages (redhat)
+  yum:
+    autoremove: yes
+  when:
+    - '"cluster" not in group_names'
+    - '"matching" not in group_names'     
+  tags: upgrade
+
+### reboot system after update
+- name: reboot system, upgrade succeed
+  command: /sbin/shutdown -r +1
+  async: 0
+  poll: 0
+  ignore_errors: true
+  when:
+    - upgraded_RH is succeeded
+    - upgraded_RH is changed
+    - '"cluster" not in group_names'
+    - '"extern" not in group_names'
+    - '"matching" not in group_names'
+  tags: upgrade_reboot
+
+- name: copy kernel.sh
+  copy:
+    src: kernel.sh
+    dest: /tmp/kernel.sh
+    mode: 0700
+    owner: 0
+    group: 0
+  when:
+    - '"cluster" not in group_names'
+    - '"matching" not in group_names'
+  tags: [ never, kernel ]
+
+- name: execute kernel.sh to remove old kernel
+  command: /tmp/kernel.sh
+  register: kernel_exec
+  when:
+    - '"cluster" not in group_names'
+    - '"matching" not in group_names' 
+  tags: [ never, kernel ]
+
+- name: reboot after execute
+  command: /sbin/shutdown -r +1
+  async: 0
+  poll: 0
+  ignore_errors: true
+  when:
+    - kernel_exec is defined
+    - kernel_exec is succeeded
+  tags: [ never, kernel ]
+  

@@ -1,0 +1,5 @@
+{% for disk in disks.stdout_lines %}
+{{ disk }} -a -o on -S on -m heiko.bollert@giata.de
+{% endfor %}
+start_smartd=yes
+smartd_opts="--interval=1800"

@@ -1,0 +1,8 @@
+---
+ansible_host: 176.9.102.106
+ansible_port: 2222
+FW_RichRules:
+  - rule family="ipv4" service name="ftp" accept
+  - rule family="ipv4" source address="213.61.210.242" port port="10050" protocol="tcp" accept
+  - rule family="ipv4" port port="30000-30500" protocol="tcp" accept
+SMTP_sender: technik@giata.com

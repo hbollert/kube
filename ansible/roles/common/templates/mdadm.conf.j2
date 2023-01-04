@@ -1,0 +1,5 @@
+DEVICE partitions
+MAILADDR heiko.bollert@giata.de
+{% for raid in mdadm.stdout_lines %}
+{{ raid }}
+{% endfor %}

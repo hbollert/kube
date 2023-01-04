@@ -1,0 +1,10 @@
+---
+ansible_host: 172.26.110.13
+ansible_python_interpreter: /usr/bin/python3.6
+FW_RichRules:
+  - rule family="ipv4" service name="bacula" accept
+  - rule family="ipv4" service name="eaton" accept
+  - rule family="ipv4" source address="172.26.110.207" port port="10050" protocol="tcp" accept
+  - rule family="ipv4" source address="172.26.1.0/24" service name="cockpit" accept
+  - rule family="ipv4" source address="172.26.80.0/24" service name="cockpit" accept
+SMTP_sender: technik@giata.com

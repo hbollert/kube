@@ -1,0 +1,46 @@
+queue_directory = /var/spool/postfix
+command_directory = /usr/sbin
+daemon_directory = /usr/libexec/postfix
+data_directory = /var/lib/postfix
+mail_owner = postfix
+meta_directory = /etc/postfix
+shlib_directory = /usr/lib64/postfix
+
+inet_interfaces = localhost
+inet_protocols = all
+
+myhostname = {{ inventory_hostname }}
+mynetworks_style = host
+mydestination = $myhostname, localhost
+mynetworks = 127.0.0.0/8, [::1]/128
+unknown_local_recipient_reject_code = 550
+
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+debug_peer_level = 2
+debugger_command =
+  PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
+  ddd $daemon_directory/$process_name $process_id & sleep 5
+sendmail_path = /usr/sbin/sendmail.postfix
+newaliases_path = /usr/bin/newaliases.postfix
+mailq_path = /usr/bin/mailq.postfix
+setgid_group = postdrop
+html_directory = no
+
+relayhost = [smtp.office365.com]:587
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_path = smtpd
+smtp_use_tls = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_type = cyrus
+smtp_sasl_auth_enable = yes
+smtp_sasl_security_options = noanonymous
+smtp_cname_overrides_servername = no
+sender_canonical_classes = envelope_sender, header_sender
+sender_canonical_maps =  regexp:/etc/postfix/sender_canonical_maps
+smtp_header_checks = regexp:/etc/postfix/header_check
+
+
+message_size_limit = 25600000
+compatibility_level = 2
+disable_vrfy_command = yes
