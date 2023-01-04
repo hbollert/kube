@@ -11,36 +11,15 @@
 ### SW installed
 - name: ensure that SW are installed
   yum:
-    name: epel-release,parted,gdisk,logwatch,nano,yum-utils
+    name: epel-release,parted,logwatch,nano,yum-utils
     state: latest
   tags: software
-
-### cockpit
-- name: ensure that cockpit is installed
-  yum:
-    name: cockpit,cockpit-packagekit,cockpit-storaged,cockpit-bridge,cockpit-ws,cockpit-system
-    state: latest
-  when: 
-   - '"cockpit" in group_names'
-  tags: cockpit
-
-- name: be sure cockpit is running and enabled
-  service:
-    name: cockpit
-    state: started
-    enabled: yes
-  when: 
-   - '"cockpit" in group_names'  
-  tags: cockpit
 
 ### podman
 - name: ensure that podman is installed
   yum:
-    name: podman,podman-compose,cockpit-podman
+    name: podman,podman-compose
     state: latest
-  when: 
-    - '"podman" in group_names'
-    - '"cockpit" in group_names'    
   tags: podman
 
 - name: be sure podman is running and enabled
@@ -48,9 +27,6 @@
     name: podman
     state: started
     enabled: yes
-  when: 
-    - '"podman" in group_names'
-    - '"cockpit" in group_names'  
   tags: podman
 
 ### postfix
@@ -60,8 +36,6 @@
     state: absent
   when:
     - SMTP_sender is defined
-    - 'inventory_hostname != "smtp-01"'
-    - ansible_distribution_major_version >= "8"
   tags: postfix
 
 - name: ensure that postfix is installed
@@ -70,8 +44,6 @@
     state: installed
   when:
     - SMTP_sender is defined
-    - 'inventory_hostname != "smtp-01"'
-    - ansible_distribution_major_version >= "8"
   tags: postfix
 
 - name: copy config file postfix
@@ -83,8 +55,6 @@
     - restart postfix
   when:
     - SMTP_sender is defined
-    - 'inventory_hostname != "smtp-01"'
-    - ansible_distribution_major_version >= "8"
   tags: postfix
 
 - name: copy auth file postfix
@@ -95,17 +65,12 @@
   register: postfix_technik
   when:
     - SMTP_sender is defined
-    - SMTP_sender is search("technik@giata.com")
-    - 'inventory_hostname != "smtp-01"'
-    - ansible_distribution_major_version >= "8"
   tags: postfix
 
 - name: build postfix sasl if file copied
   shell: "postmap /etc/postfix/sasl_passwd"
   when:
     - postfix_technik is defined and postfix_technik is changed
-    - 'inventory_hostname != "smtp-01"'
-    - ansible_distribution_major_version >= "8"
   tags: postfix
 
 - name: copy header map file
@@ -117,8 +82,6 @@
     - restart postfix
   when:
     - SMTP_sender is defined
-    - 'inventory_hostname != "smtp-01"'
-    - ansible_distribution_major_version >= "8"
   tags: postfix
 
 - name: copy sender map file
@@ -130,8 +93,6 @@
     - restart postfix
   when:
     - SMTP_sender is defined
-    - 'inventory_hostname != "smtp-01"'
-    - ansible_distribution_major_version >= "8"
   tags: postfix
 
 - name: replace aliases
@@ -142,8 +103,6 @@
   notify: rebuild aliases
   when:
     - SMTP_sender is defined
-    - 'inventory_hostname != "smtp-01"'
-    - ansible_distribution_major_version >= "8"
   tags: postfix
   
 - name: be sure postfix is running and enabled
@@ -153,6 +112,4 @@
     enabled: yes
   when:
     - SMTP_sender is defined
-    - 'inventory_hostname != "smtp-01"'
-    - ansible_distribution_major_version >= "8"
   tags: postfix

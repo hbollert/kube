@@ -1,6 +1,0 @@
----
-ansible_host: 172.26.115.4
-#ansible_python_interpreter: /usr/bin/python3.6
-FW_RichRules:
-  - rule family="ipv4" service name="ipp" accept
-  - rule family="ipv4" source address="172.26.110.207" port port="10050" protocol="tcp" accept

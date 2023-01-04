@@ -6,7 +6,7 @@
   tags: kernel_version
 
 - name: get installed kernel
-  shell: rpm -qa kernel
+  shell: rpm -qa kernel-core
   register: kernel_installed_redhat
   tags: kernel_version
   args:
