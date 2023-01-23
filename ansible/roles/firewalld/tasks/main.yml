@@ -1,0 +1,103 @@
+---
+- name: be sure firewalld are installed
+  yum:
+    name: firewalld
+    state: latest
+  tags: fwd
+
+- name: ensure that firewalld is running and enabled
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+  tags: fwd
+
+- name: disable zone drifting
+  lineinfile:
+    path: /etc/firewalld/firewalld.conf
+    regexp: '^AllowZoneDrifting='
+    line: 'AllowZoneDrifting=no'
+  notify: restart firewalld
+  tags: fwd
+
+#allowed on intern servern
+- name: allowed ssh on intern server
+  firewalld:
+    zone: public
+    service: ssh
+    permanent: yes
+    immediate: yes
+    state: enabled
+  when:
+    - FW_Zone_INT is not defined
+  tags: fwd_int
+
+- name: ssh on intern server with zones
+  firewalld:
+    zone: "{{ item.zone }}"
+    service: ssh
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items: 
+    - zone: "{{ FW_Zone_INT }}"
+  when:
+    - FW_Zone_INT is defined
+    - FW_Rules_SSH is not defined
+  tags: fwd_int
+
+- name: ssh rules on intern servern with zone
+  firewalld:
+    zone: "{{ item.zone }}"
+    rich_rule: "{{ item.rule }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items: "{{ FW_Rules_SSH }}"
+  when:
+    - FW_Zone_INT is defined
+    - FW_Rules_SSH is defined
+  tags: fwd_int
+
+- name: allowed rules on intern servern intern zone
+  firewalld:
+    zone: "{{ item.zone }}"
+    rich_rule: "{{ item.rule }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items: "{{ FW_Rules_INT }}"
+  when:
+    - FW_Zone_INT is defined
+    - FW_Rules_INT is defined
+  tags: fwd_int
+
+- name: allowed rules on intern server extern zone
+  firewalld:
+    zone: "{{ item.zone }}"
+    rich_rule: "{{ item.rule }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items: "{{ FW_Rules_EXT }}"
+  when:
+    - FW_Zone_EXT is defined
+    - FW_Rules_EXT is defined
+  tags: fwd_int
+
+- name: firewalld disabled all services
+  firewalld:
+    zone: "{{ item.zone }}"
+    service: "{{ item.service }}"
+    permanent: yes
+    immediate: yes
+    state: disabled
+  with_items:
+    - { zone: 'public', service: dhcpv6-client }
+    - { zone: 'public', service: ssh }    
+    - { zone: 'public', service: cockpit }
+    - { zone: 'work', service: dhcpv6-client }
+    - { zone: 'work', service: ssh }    
+    - { zone: 'work', service: cockpit }
+    - { zone: 'dmz', service: ssh }    
+  tags: fwd

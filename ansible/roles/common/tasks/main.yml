@@ -1,11 +1,8 @@
 ---
-### SW not installed
 - name: ensure that SW are not installed
   yum:
     name: cockpit,cockpit-bridge
     state: absent
-  when:
-    - '"cockpit" not in group_names'
   tags: software
 
 ### SW installed
@@ -15,101 +12,13 @@
     state: latest
   tags: software
 
-### podman
-- name: ensure that podman is installed
-  yum:
-    name: podman,podman-compose
-    state: latest
-  tags: podman
-
-- name: be sure podman is running and enabled
-  service:
-    name: podman
-    state: started
-    enabled: yes
-  tags: podman
-
-### postfix
-- name: ensure that sendmail are not installed
-  yum:
-    name: sendmail
-    state: absent
-  when:
-    - SMTP_sender is defined
-  tags: postfix
-
-- name: ensure that postfix is installed
-  package:
-    name: postfix,cyrus-sasl,cyrus-sasl-plain,s-nail
-    state: installed
-  when:
-    - SMTP_sender is defined
-  tags: postfix
-
-- name: copy config file postfix
-  template:
-    src: main.cf.j2
-    dest: /etc/postfix/main.cf
-    mode: 0644
-  notify:
-    - restart postfix
-  when:
-    - SMTP_sender is defined
-  tags: postfix
-
-- name: copy auth file postfix
-  template:
-    src: sasl_passwd.j2
-    dest: /etc/postfix/sasl_passwd
-    mode: 0600
-  register: postfix_technik
-  when:
-    - SMTP_sender is defined
-  tags: postfix
-
-- name: build postfix sasl if file copied
-  shell: "postmap /etc/postfix/sasl_passwd"
-  when:
-    - postfix_technik is defined and postfix_technik is changed
-  tags: postfix
-
-- name: copy header map file
-  template:
-    src: header_check.j2
-    dest: /etc/postfix/header_check
-    mode: 0644
-  notify:
-    - restart postfix
-  when:
-    - SMTP_sender is defined
-  tags: postfix
-
-- name: copy sender map file
-  template:
-    src: sender_canonical_maps.j2
-    dest: /etc/postfix/sender_canonical_maps
-    mode: 0644
-  notify:
-    - restart postfix
-  when:
-    - SMTP_sender is defined
-  tags: postfix
-
-- name: replace aliases
-  lineinfile:
-    path: /etc/aliases
-    regexp: '^root: *'
-    line: 'root: heiko.bollert@giata.de'
-  notify: rebuild aliases
-  when:
-    - SMTP_sender is defined
-  tags: postfix
-  
-- name: be sure postfix is running and enabled
-  service:
-    name: postfix
-    state: started
-    enabled: yes
-  when:
-    - SMTP_sender is defined
-  tags: postfix
+- name: add known hosts
+  blockinfile:
+    path: /etc/hosts
+    block: |
+      192.168.80.1   tec-01.giata.intern tec-01
+      192.168.80.2   tec-02.giata.intern tec-02
+      192.168.80.3   tec-03.giata.intern tec-03
+      192.168.80.10  tec-10.giata.intern tec-10
+    marker: "# {mark} ANSIBLE MANAGED USER BLOCK"
+  tags: hosts

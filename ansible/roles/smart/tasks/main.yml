@@ -1,4 +1,4 @@
-### smart
+---
 - name: be sure smartmontools is installed
   yum:
     name: smartmontools

@@ -1,0 +1,24 @@
+---
+- name: be sure fail2ban are installed
+  yum:
+    name: fail2ban,whois
+    state: latest
+  tags: f2b
+
+- name: ensure that f2b is running and enabled
+  service:
+    name: fail2ban
+    state: started
+    enabled: yes
+  tags: f2b
+
+- name: be sure f2b is configured
+  template:
+    src: jail.conf.j2
+    dest: /etc/fail2ban/jail.conf
+    mode: 0644
+    owner: "0"
+    group: "0"
+    backup: yes
+  notify: restart fail2ban
+  tags: f2b
