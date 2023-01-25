@@ -3,6 +3,7 @@
   yum:
     name: openssh
     state: latest
+    update_cache: true
   tags: sshd
 
 - name: be sure sshd is configured

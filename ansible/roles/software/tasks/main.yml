@@ -1,0 +1,48 @@
+---
+- name: enable HA
+  lineinfile:
+    path: /etc/yum.repos.d/almalinux-highavailability.repo
+    regexp: '^enabled='
+    line: 'enabled=1' 
+    firstmatch: true
+    state: present
+  tags: HA
+
+- name: install HA
+  yum:
+    name: pcs,pacemaker,fence-agents-all
+    state: latest
+  tags: HA
+
+- name: be sure pscd is running and enabled
+  service:
+    name: pcsd
+    state: started
+    enabled: yes
+  tags: HA
+
+- name: install Apache
+  yum:
+    name: httpd,wget
+    state: latest
+  tags: HA
+  
+- name: copy index.html
+  template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    mode: 0644
+    owner: "0"
+    group: "0"
+  notify: restart httpd
+  tags: HA  
+
+- name: copy status.conf
+  template:
+    src: status.conf.j2
+    dest: //etc/httpd/conf.d/status.conf
+    mode: 0644
+    owner: "0"
+    group: "0"
+  notify: restart httpd
+  tags: HA  

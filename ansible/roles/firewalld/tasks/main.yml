@@ -20,17 +20,13 @@
   notify: restart firewalld
   tags: fwd
 
-#allowed on intern servern
-- name: allowed ssh on intern server
-  firewalld:
-    zone: public
-    service: ssh
-    permanent: yes
-    immediate: yes
-    state: enabled
+- name: Add interconnect interface to zone
+  shell: 'firewall-cmd --permanent --zone="{{ item.zone }}" --add-interface="{{ item.int }}"'
+  with_items: "{{ FW_Interfaces }}"
   when:
-    - FW_Zone_INT is not defined
-  tags: fwd_int
+    - FW_Interfaces is defined
+  notify: restart firewalld
+  tags: fwd_test
 
 - name: ssh on intern server with zones
   firewalld:

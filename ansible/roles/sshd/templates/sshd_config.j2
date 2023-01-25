@@ -1,19 +1,7 @@
 Port 22
-Port 2222
 ListenAddress 0.0.0.0
-{% if ansible_distribution != "AlmaLinux" and ansible_distribution_major_version != "8" %}
-UsePrivilegeSeparation yes
-{% endif %}
 
-HostKey /etc/ssh/ssh_host_rsa_key
 HostKey /etc/ssh/ssh_host_ed25519_key
-
-{% if ansible_distribution == "CentOS" and ansible_distribution_major_version == "7" %}
-# Ciphers and keying
-Ciphers aes128-ctr,aes192-ctr,aes256-ctr
-MACs    hmac-sha2-512,hmac-sha2-256
-KexAlgorithms diffie-hellman-group16-sha512,diffie-hellman-group16-sha512,diffie-hellman-group14-sha256,curve25519-sha256,curve25519-sha256@libssh.org
-{% endif %}
 
 SyslogFacility AUTHPRIV
 #LogLevel INFO
@@ -26,12 +14,7 @@ MaxSessions 10
 PubkeyAuthentication yes
 AuthorizedKeysFile	.ssh/authorized_keys .ssh/authorized_keys2
 
-{% if 'upload.giata.com' in inventory_hostname %}
-PasswordAuthentication yes
-PermitEmptyPasswords no
-{% else %}
 PasswordAuthentication no
-{% endif %}
 ChallengeResponseAuthentication no
 HostbasedAuthentication no
 IgnoreRhosts yes
@@ -53,17 +36,3 @@ AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
 AcceptEnv XMODIFIERS
 
 Subsystem	sftp    /usr/libexec/openssh/sftp-server
-
-{% if 'upload.giata.com' in inventory_hostname %}
-# Ciphers and keying
-Ciphers	aes128-ctr,aes192-ctr,aes256-ctr
-MACs	hmac-sha2-512,hmac-sha2-256
-KexAlgorithms diffie-hellman-group16-sha512,diffie-hellman-group16-sha512,diffie-hellman-group14-sha256,curve25519-sha256,curve25519-sha256@libssh.org
-# match rules
-DenyGroups ftp
-AllowGroups root sftponly
-Match Group sftponly
-    ChrootDirectory %h
-    AllowTCPForwarding no
-    ForceCommand internal-sftp
-{% endif %}

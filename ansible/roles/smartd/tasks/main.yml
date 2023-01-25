@@ -3,21 +3,15 @@
   yum:
     name: smartmontools
     state: installed
-  when:
-    - '"redhat" in group_names or "extern" in group_names'
   tags: smartd
 
 - name: update smart db
   shell: "update-smart-drivedb"
-  when:
-    - '"redhat" in group_names or "extern" in group_names'
   tags: smartd
 
 - name: list disks present in the system
   shell: "smartctl --scan | grep -v '/dev/nvme' | grep -v '/dev/bus/' | awk '{print $1}'"
   register: disks
-  when:
-    - '"redhat" in group_names or "extern" in group_names'
   tags: smartd
 
 - name: check if disks support SMART
@@ -25,10 +19,7 @@
   with_items: "{{disks.stdout_lines}}"
   register: smart
   ignore_errors: True
-  when:
-    - '"tpm" in inventory_hostname'
-    - '"smtp-01" in inventory_hostname'
-  tags: [ 'never','smart_test' ]
+  tags: smartd
 
 - name: create smartd configuration file
   template:
@@ -40,8 +31,7 @@
   notify: restart smartd
   when:
     - smart is succeeded
-    - '"redhat" in group_names'
-  tags: [ 'never','smart_test' ]
+  tags: smartd
 
 - name: be sure smartd is running and enabled
   service:
@@ -50,42 +40,11 @@
     enabled: yes
   when:
     - smart is succeeded
-    - '"redhat" in group_names'
-  tags: [ 'never','smart_test' ]
+  tags: smartd
 
 - name: start short test on drives
   shell: "smartctl -t short {{ item }}"
   with_items: "{{disks.stdout_lines}}"
   when:
     - smart is succeeded
-    - '"redhat" in group_names'
-  tags: [ 'never','smart_test' ]
-
-### mdadm
-- name: be sure that scheduled RAID checks are disabled
-  file:
-    path: /etc/cron.d/raid-check
-    state: absent
-  tags: mdadm
-
-- name: check mdadm is installed
-  yum:
-    name: mdadm
-    state: installed
-  tags: mdadm
-
-- name: list mdraid present in the system
-  shell: "mdadm --detail --scan"
-  register: mdadm
-  tags: mdadm
-
-- name: configured mdadm
-  template:
-    src: mdadm.conf.j2
-    dest: /etc/mdadm.conf
-    owner: root
-    group: root
-    mode: 0644
-  when:
-    - mdadm.stdout != ""
-  tags: mdadm
+  tags: smartd

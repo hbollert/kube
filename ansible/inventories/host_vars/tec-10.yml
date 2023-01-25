@@ -1,5 +1,9 @@
 ---
 ansible_host: 172.26.80.10
+FW_Interfaces: 
+  - { zone: 'trusted', int: 'enp1s0f0' }
+  - { zone: 'dmz', int: 'enp1s0f1' }
+  - { zone: 'work', int: 'enp2s0' }
 FW_Zone_INT: work
 FW_Zone_EXT: dmz
 FW_Rules_SSH:

@@ -1,4 +1,5 @@
 ---
+- import_playbook: common.yml
 - import_playbook: sshd.yml
 - import_playbook: chronyd.yml
 - import_playbook: postfix.yml
@@ -6,4 +7,4 @@
 - import_playbook: fail2ban.yml
 - import_playbook: firewalld.yml
 - import_playbook: maintenance.yml
-- import_playbook: check.yml
+#- import_playbook: check.yml

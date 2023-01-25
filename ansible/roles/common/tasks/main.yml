@@ -1,16 +1,17 @@
 ---
 - name: ensure that SW are not installed
   yum:
-    name: cockpit,cockpit-bridge
+    name: cockpit,cockpit-bridge,cockpit-ws
     state: absent
-  tags: software
+  tags: common
 
 ### SW installed
 - name: ensure that SW are installed
   yum:
     name: epel-release,parted,logwatch,nano,yum-utils
     state: latest
-  tags: software
+    update_cache: true
+  tags: common
 
 - name: add known hosts
   blockinfile:
@@ -22,3 +23,4 @@
       192.168.80.10  tec-10.giata.intern tec-10
     marker: "# {mark} ANSIBLE MANAGED USER BLOCK"
   tags: hosts
+

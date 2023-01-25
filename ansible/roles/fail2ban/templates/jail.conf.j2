@@ -61,10 +61,3 @@ logpath  = %(dropbear_log)s
 backend  = %(dropbear_backend)s
 enabled  = true
 
-{% if 'upload.giata.com' in inventory_hostname %}
-[vsftpd]
-port     = ftp,ftp-data,ftps,ftps-data
-logpath  = %(vsftpd_log)s
-maxretry = 5
-enabled  = true
-{% endif %}
